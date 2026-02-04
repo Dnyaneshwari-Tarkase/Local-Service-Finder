@@ -17,7 +17,8 @@ export const AuthProvider = ({ children }) => {
         if (decoded.exp < currentTime) {
           logout();
         } else {
-          fetchUser();
+          // fetchUser handles its own errors and sets loading to false
+          fetchUser().catch(() => {});
         }
       } catch (error) {
         logout();
@@ -31,21 +32,26 @@ export const AuthProvider = ({ children }) => {
     try {
       const response = await api.get('/users/me');
       setUser(response.data);
+      setLoading(false);
+      return response.data;
     } catch (error) {
       logout();
-    } finally {
       setLoading(false);
+      throw error;
     }
   };
 
   const login = async (email, password) => {
-    const formData = new FormData();
-    formData.append('username', email);
-    formData.append('password', password);
+    // Use URLSearchParams for application/x-www-form-urlencoded
+    const params = new URLSearchParams();
+    params.append('username', email);
+    params.append('password', password);
 
-    const response = await api.post('/auth/login', formData);
+    const response = await api.post('/auth/login', params);
     const { access_token, role } = response.data;
     localStorage.setItem('token', access_token);
+
+    // We need to fetch user details after setting the token
     await fetchUser();
     return role;
   };
