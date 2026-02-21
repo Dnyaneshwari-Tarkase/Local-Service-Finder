@@ -8,25 +8,11 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      try {
-        const decoded = jwtDecode(token);
-        const currentTime = Date.now() / 1000;
-        if (decoded.exp < currentTime) {
-          logout();
-        } else {
-          // fetchUser handles its own errors and sets loading to false
-          fetchUser().catch(() => {});
-        }
-      } catch (error) {
-        logout();
-      }
-    } else {
-      setLoading(false);
-    }
-  }, []);
+  const logout = () => {
+    localStorage.removeItem('token');
+    setUser(null);
+    setLoading(false);
+  };
 
   const fetchUser = async () => {
     try {
@@ -41,6 +27,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      try {
+        const decoded = jwtDecode(token);
+        const currentTime = Date.now() / 1000;
+        if (decoded.exp < currentTime) {
+          logout();
+        } else {
+          // fetchUser handles its own errors and sets loading to false
+          fetchUser().catch(() => {});
+        }
+      } catch {
+        logout();
+      }
+    } else {
+      setLoading(false);
+    }
+  }, []);
+
   const login = async (email, password) => {
     // Use URLSearchParams for application/x-www-form-urlencoded
     const params = new URLSearchParams();
@@ -54,12 +60,6 @@ export const AuthProvider = ({ children }) => {
     // We need to fetch user details after setting the token
     await fetchUser();
     return role;
-  };
-
-  const logout = () => {
-    localStorage.removeItem('token');
-    setUser(null);
-    setLoading(false);
   };
 
   return (
