@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlmodel
+bcrypt==4.0.1
+passlib[bcrypt]
+python-jose[cryptography]
+python-multipart
+httpx
+pydantic-settings
+python-dotenv
+email-validator
