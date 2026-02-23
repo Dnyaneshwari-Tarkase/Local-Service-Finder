@@ -39,7 +39,7 @@ export const AuthProvider = ({ children }) => {
           // fetchUser handles its own errors and sets loading to false
           fetchUser().catch(() => {});
         }
-      } catch (error) {
+      } catch {
         logout();
       }
     } else {

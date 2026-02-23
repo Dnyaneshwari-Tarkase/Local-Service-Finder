@@ -7,6 +7,10 @@ load_dotenv()
 # Default to SQLite for easier local development
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./local_service_finder.db")
 
+# In Vercel, use /tmp for SQLite as the root is read-only
+if os.getenv("VERCEL") and DATABASE_URL.startswith("sqlite:///./"):
+    DATABASE_URL = DATABASE_URL.replace("sqlite:///./", "sqlite:////tmp/")
+
 # Ensure the directory for the database exists if it's a file-based SQLite URL
 if DATABASE_URL.startswith("sqlite:///"):
     db_path = DATABASE_URL.replace("sqlite:///", "")
