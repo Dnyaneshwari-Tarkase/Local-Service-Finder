@@ -3,13 +3,33 @@
   "buildCommand": "cd frontend && npm install && npm run build",
   "outputDirectory": "frontend/dist",
   "rewrites": [
-    { "source": "/api/(.*)", "destination": "/api/index.py" },
-    { "source": "/auth/(.*)", "destination": "/api/index.py" },
-    { "source": "/users/(.*)", "destination": "/api/index.py" },
-    { "source": "/providers/(.*)", "destination": "/api/index.py" },
-    { "source": "/bookings/(.*)", "destination": "/api/index.py" },
-    { "source": "/reviews/(.*)", "destination": "/api/index.py" },
-    { "source": "/admin/(.*)", "destination": "/api/index.py" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/auth/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/users/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/providers/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/bookings/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/reviews/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/admin/(.*)",
+      "destination": "/api/index.py"
+    }
   ]
 }
