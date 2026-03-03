@@ -122,8 +122,8 @@ def complete_service(
 
     booking.status = BookingStatus.COMPLETED
 
-    # Simple commission logic: 90% to provider, 10% to admin
-    provider_share = booking.total_price * 0.9
+    # Dynamic commission logic: Provider keeps (1 - commission_rate)
+    provider_share = booking.total_price * (1 - provider.commission_rate)
     provider.wallet_balance += provider_share
 
     session.add(booking)

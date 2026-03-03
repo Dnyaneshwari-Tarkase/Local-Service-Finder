@@ -13,6 +13,11 @@ class BookingStatus(str, Enum):
     COMPLETED = "completed"
     CANCELLED = "cancelled"
 
+class PayoutStatus(str, Enum):
+    PENDING = "pending"
+    APPROVED = "approved"
+    REJECTED = "rejected"
+
 class User(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
     name: str
@@ -33,14 +38,19 @@ class ServiceProvider(SQLModel, table=True):
     verified: bool = Field(default=False)
     is_online: bool = Field(default=False)
     wallet_balance: float = Field(default=0.0)
+    commission_rate: float = Field(default=0.15) # 15% platform fee
     contact_info: str
     profile_picture: Optional[str] = None
+    kyc_document: Optional[str] = None # URL to uploaded ID proof
     location_pincode: str
+    latitude: Optional[float] = None
+    longitude: Optional[float] = None
     rating_avg: float = Field(default=0.0)
 
     # Relationships
     user: User = Relationship(back_populates="provider_profile")
     bookings: List["Booking"] = Relationship(back_populates="provider")
+    payout_requests: List["PayoutRequest"] = Relationship(back_populates="provider")
 
 class Booking(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
@@ -67,6 +77,17 @@ class Review(SQLModel, table=True):
 
     # Relationships
     booking: Booking = Relationship(back_populates="review")
+
+class PayoutRequest(SQLModel, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+    provider_id: int = Field(foreign_key="serviceprovider.id")
+    amount: float
+    status: PayoutStatus = Field(default=PayoutStatus.PENDING)
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: Optional[datetime] = None
+
+    # Relationships
+    provider: ServiceProvider = Relationship(back_populates="payout_requests")
 
 class AdminLog(SQLModel, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)

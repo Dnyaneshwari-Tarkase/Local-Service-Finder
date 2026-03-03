@@ -2,9 +2,10 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select, col, or_, desc
 from app.database import get_session
-from app.models import User, ServiceProvider, UserRole
+from app.models import User, ServiceProvider, UserRole, PayoutRequest, PayoutStatus
 from app.schemas import ProviderCreate, ProviderRead
 from app.auth import get_current_user
+from datetime import datetime, timezone
 
 router = APIRouter()
 
@@ -84,3 +85,36 @@ def toggle_online_status(
     session.commit()
     session.refresh(provider)
     return {"message": f"Provider is now {'online' if is_online else 'offline'}", "is_online": provider.is_online}
+
+@router.post("/me/request-payout")
+def request_payout(
+    amount: float,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    if current_user.role != UserRole.PROVIDER:
+        raise HTTPException(status_code=403, detail="Only providers can request payouts")
+
+    provider = session.exec(select(ServiceProvider).where(ServiceProvider.user_id == current_user.id)).first()
+    if not provider:
+        raise HTTPException(status_code=404, detail="Provider profile not found")
+
+    if amount > provider.wallet_balance:
+        raise HTTPException(status_code=400, detail="Insufficient wallet balance")
+
+    if amount <= 0:
+        raise HTTPException(status_code=400, detail="Amount must be greater than zero")
+
+    payout = PayoutRequest(
+        provider_id=provider.id,
+        amount=amount,
+        status=PayoutStatus.PENDING
+    )
+
+    # Deduct from wallet immediately to prevent double-dipping
+    provider.wallet_balance -= amount
+
+    session.add(payout)
+    session.add(provider)
+    session.commit()
+    return {"message": "Payout request submitted successfully", "amount": amount, "remaining_balance": provider.wallet_balance}
