@@ -1,5 +1,5 @@
 from typing import Optional, List
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ConfigDict
 from datetime import datetime
 from app.models import UserRole, BookingStatus, PayoutStatus
 
@@ -10,14 +10,12 @@ class UserCreate(BaseModel):
     role: UserRole = UserRole.CUSTOMER
 
 class UserRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     name: str
     email: EmailStr
     role: UserRole
     created_at: datetime
-
-    class Config:
-        from_attributes = True
 
 class Token(BaseModel):
     access_token: str
@@ -35,6 +33,7 @@ class ProviderCreate(BaseModel):
     longitude: Optional[float] = None
 
 class ProviderRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     user_id: int
     services: str
@@ -49,10 +48,8 @@ class ProviderRead(BaseModel):
     rating_avg: float
     user: UserRead
 
-    class Config:
-        from_attributes = True
-
 class PayoutRequestRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     provider_id: int
     amount: float
@@ -60,15 +57,13 @@ class PayoutRequestRead(BaseModel):
     created_at: datetime
     updated_at: Optional[datetime] = None
 
-    class Config:
-        from_attributes = True
-
 class BookingCreate(BaseModel):
     provider_id: int
     date_time: datetime
     total_price: float = 0.0
 
 class BookingRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     user_id: int
     provider_id: int
@@ -81,20 +76,15 @@ class BookingRead(BaseModel):
     provider: Optional[ProviderRead] = None
     customer: Optional[UserRead] = None
 
-    class Config:
-        from_attributes = True
-
 class ReviewCreate(BaseModel):
     booking_id: int
     rating: int
     comment: Optional[str] = None
 
 class ReviewRead(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
     id: int
     booking_id: int
     rating: int
     comment: Optional[str] = None
     created_at: datetime
-
-    class Config:
-        from_attributes = True
