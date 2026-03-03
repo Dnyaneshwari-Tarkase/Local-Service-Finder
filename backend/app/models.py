@@ -31,6 +31,8 @@ class ServiceProvider(SQLModel, table=True):
     services: str  # Comma-separated or JSON string for categories
     experience: int # Years
     verified: bool = Field(default=False)
+    is_online: bool = Field(default=False)
+    wallet_balance: float = Field(default=0.0)
     contact_info: str
     profile_picture: Optional[str] = None
     location_pincode: str
@@ -45,6 +47,9 @@ class Booking(SQLModel, table=True):
     user_id: int = Field(foreign_key="user.id")
     provider_id: int = Field(foreign_key="serviceprovider.id")
     status: BookingStatus = Field(default=BookingStatus.PENDING)
+    total_price: float = Field(default=0.0)
+    start_otp: Optional[str] = None
+    end_otp: Optional[str] = None
     date_time: datetime
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 

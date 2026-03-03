@@ -37,6 +37,8 @@ class ProviderRead(BaseModel):
     services: str
     experience: int
     verified: bool
+    is_online: bool
+    wallet_balance: float
     contact_info: str
     location_pincode: str
     rating_avg: float
@@ -48,12 +50,16 @@ class ProviderRead(BaseModel):
 class BookingCreate(BaseModel):
     provider_id: int
     date_time: datetime
+    total_price: float = 0.0
 
 class BookingRead(BaseModel):
     id: int
     user_id: int
     provider_id: int
     status: BookingStatus
+    total_price: float
+    start_otp: Optional[str] = None
+    end_otp: Optional[str] = None
     date_time: datetime
     created_at: datetime
     provider: Optional[ProviderRead] = None

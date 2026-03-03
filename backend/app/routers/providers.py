@@ -65,3 +65,22 @@ def get_provider_detail(provider_id: int, session: Session = Depends(get_session
     if not provider:
         raise HTTPException(status_code=404, detail="Provider not found")
     return provider
+
+@router.patch("/me/status")
+def toggle_online_status(
+    is_online: bool,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    if current_user.role != UserRole.PROVIDER:
+        raise HTTPException(status_code=403, detail="Only providers can toggle online status")
+
+    provider = session.exec(select(ServiceProvider).where(ServiceProvider.user_id == current_user.id)).first()
+    if not provider:
+        raise HTTPException(status_code=404, detail="Provider profile not found")
+
+    provider.is_online = is_online
+    session.add(provider)
+    session.commit()
+    session.refresh(provider)
+    return {"message": f"Provider is now {'online' if is_online else 'offline'}", "is_online": provider.is_online}

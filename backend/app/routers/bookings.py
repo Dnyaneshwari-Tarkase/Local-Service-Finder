@@ -1,4 +1,5 @@
 from typing import List
+import random
 from fastapi import APIRouter, Depends, HTTPException
 from sqlmodel import Session, select
 from app.database import get_session
@@ -21,7 +22,10 @@ def create_booking(
     new_booking = Booking(
         user_id=current_user.id,
         provider_id=booking_data.provider_id,
-        date_time=booking_data.date_time
+        date_time=booking_data.date_time,
+        total_price=booking_data.total_price,
+        start_otp=f"{random.randint(1000, 9999)}",
+        end_otp=f"{random.randint(1000, 9999)}"
     )
     session.add(new_booking)
     session.commit()
@@ -74,3 +78,55 @@ def update_booking_status(
     session.commit()
     session.refresh(booking)
     return booking
+
+@router.post("/{booking_id}/start-service")
+def start_service(
+    booking_id: int,
+    otp: str,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    booking = session.get(Booking, booking_id)
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    provider = session.get(ServiceProvider, booking.provider_id)
+    if provider.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only the provider can start the service")
+
+    if booking.start_otp != otp:
+        raise HTTPException(status_code=400, detail="Invalid Start OTP")
+
+    booking.status = BookingStatus.PENDING # Or we could have a "IN_PROGRESS" status
+    session.add(booking)
+    session.commit()
+    return {"message": "Service started successfully"}
+
+@router.post("/{booking_id}/complete-service")
+def complete_service(
+    booking_id: int,
+    otp: str,
+    current_user: User = Depends(get_current_user),
+    session: Session = Depends(get_session)
+):
+    booking = session.get(Booking, booking_id)
+    if not booking:
+        raise HTTPException(status_code=404, detail="Booking not found")
+
+    provider = session.get(ServiceProvider, booking.provider_id)
+    if provider.user_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Only the provider can complete the service")
+
+    if booking.end_otp != otp:
+        raise HTTPException(status_code=400, detail="Invalid End OTP")
+
+    booking.status = BookingStatus.COMPLETED
+
+    # Simple commission logic: 90% to provider, 10% to admin
+    provider_share = booking.total_price * 0.9
+    provider.wallet_balance += provider_share
+
+    session.add(booking)
+    session.add(provider)
+    session.commit()
+    return {"message": "Service completed successfully", "provider_earnings": provider_share}
