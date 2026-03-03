@@ -31,8 +31,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     if isinstance(exc, HTTPException):
         raise exc
 
-    logger.error(f"Global exception: {exc}")
-    logger.error(traceback.format_exc())
+    logger.exception(f"Unhandled exception at {request.url.path}: {str(exc)}")
     return JSONResponse(
         status_code=500,
         content={"detail": "Internal Server Error", "message": "An unexpected error occurred. Please check the server logs for more details."},
@@ -57,4 +56,15 @@ app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to Local Service Finder API"}
+    return {"message": "Welcome to Local Service Finder API", "app_name": "Seva-Connect"}
+
+@app.get("/api/health")
+def health_check():
+    import os
+    from app.database import DATABASE_URL
+    return {
+        "status": "ok",
+        "vercel": os.getenv("VERCEL") is not None,
+        "database_url_type": "sqlite" if DATABASE_URL.startswith("sqlite") else "remote",
+        "database_path": DATABASE_URL if DATABASE_URL.startswith("sqlite") else "HIDDEN"
+    }
