@@ -1,14 +1,17 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Search, MapPin, Star, ShieldCheck, Clock } from 'lucide-react';
+import { Search, MapPin, Star, ShieldCheck, Clock, Zap, Droplets, Wrench, Scissors, Palette, Home as HomeIcon, Shield, Truck } from 'lucide-react';
 
 const Home = () => {
   const categories = [
-    { name: 'Plumber', icon: '🔧' },
-    { name: 'Electrician', icon: '⚡' },
-    { name: 'Painter', icon: '🎨' },
-    { name: 'Carpenter', icon: '🪚' },
-    { name: 'Cleaner', icon: '🧹' },
+    { name: 'Electrician', icon: <Zap className="text-amber-500" />, count: '2,400+', color: 'bg-amber-50' },
+    { name: 'Plumber', icon: <Droplets className="text-blue-500" />, count: '1,800+', color: 'bg-blue-50' },
+    { name: 'AC Repair', icon: <Wrench className="text-emerald-500" />, count: '3,100+', color: 'bg-emerald-50' },
+    { name: 'Salon & Spa', icon: <Scissors className="text-pink-500" />, count: '4,200+', color: 'bg-pink-50' },
+    { name: 'Painter', icon: <Palette className="text-purple-500" />, count: '1,500+', color: 'bg-purple-50' },
+    { name: 'Cleaning', icon: <HomeIcon className="text-green-500" />, count: '2,900+', color: 'bg-green-50' },
+    { name: 'Pest Control', icon: <Shield className="text-red-500" />, count: '900+', color: 'bg-red-50' },
+    { name: 'Shifting', icon: <Truck className="text-indigo-500" />, count: '1,100+', color: 'bg-indigo-50' },
   ];
 
   return (
@@ -37,17 +40,26 @@ const Home = () => {
       </section>
 
       {/* Categories */}
-      <section className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h2 className="text-3xl font-bold text-center mb-12 text-gray-800">Popular Categories</h2>
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-8">
+      <section className="py-20 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="text-center mb-16">
+          <h2 className="text-4xl font-extrabold text-gray-900 mb-4">Konti Seva Havi?</h2>
+          <p className="text-lg text-gray-500">
+            Choose from 50+ service categories — all professionals verified and rated
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {categories.map((cat) => (
             <Link
               key={cat.name}
               to={`/search?category=${cat.name}`}
-              className="flex flex-col items-center p-8 bg-gray-50 rounded-xl hover:bg-blue-50 transition duration-300 transform hover:-translate-y-1 shadow-sm"
+              className="group flex flex-col p-8 bg-white border border-gray-100 rounded-2xl hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
             >
-              <span className="text-4xl mb-4">{cat.icon}</span>
-              <span className="font-semibold text-gray-700">{cat.name}</span>
+              <div className={`${cat.color} w-16 h-16 rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+                {React.cloneElement(cat.icon, { size: 32 })}
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-1">{cat.name}</h3>
+              <p className="text-gray-500 text-sm font-medium">{cat.count} Providers</p>
             </Link>
           ))}
         </div>
