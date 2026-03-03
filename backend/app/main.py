@@ -1,8 +1,16 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
+from fastapi import Request, HTTPException
+from fastapi.responses import JSONResponse
+import logging
+import traceback
 from app.database import create_db_and_tables
 from app.routers import auth, users, providers, bookings, reviews, admin
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -16,6 +24,18 @@ app = FastAPI(
     title="Local Service Finder – Neighborhood Helper App",
     lifespan=lifespan
 )
+
+@app.exception_handler(Exception)
+async def global_exception_handler(request: Request, exc: Exception):
+    # Let FastAPI handle HTTPExceptions normally
+    if isinstance(exc, HTTPException):
+        raise exc
+
+    logger.exception(f"Unhandled exception at {request.url.path}: {str(exc)}")
+    return JSONResponse(
+        status_code=500,
+        content={"detail": "Internal Server Error", "message": "An unexpected error occurred. Please check the server logs for more details."},
+    )
 
 # CORS Configuration
 app.add_middleware(
@@ -36,4 +56,15 @@ app.include_router(admin.router, prefix="/admin", tags=["Admin"])
 
 @app.get("/")
 def read_root():
-    return {"message": "Welcome to Local Service Finder API"}
+    return {"message": "Welcome to Local Service Finder API", "app_name": "Seva-Connect"}
+
+@app.get("/api/health")
+def health_check():
+    import os
+    from app.database import DATABASE_URL
+    return {
+        "status": "ok",
+        "vercel": os.getenv("VERCEL") is not None,
+        "database_url_type": "sqlite" if DATABASE_URL.startswith("sqlite") else "remote",
+        "database_path": DATABASE_URL if DATABASE_URL.startswith("sqlite") else "HIDDEN"
+    }

@@ -26,6 +26,8 @@ connect_args = {"check_same_thread": False} if DATABASE_URL.startswith("sqlite")
 engine = create_engine(DATABASE_URL, connect_args=connect_args)
 
 def create_db_and_tables():
+    # Import models here to ensure they are registered with SQLModel.metadata
+    from app import models
     SQLModel.metadata.create_all(engine)
 
 def get_session():
