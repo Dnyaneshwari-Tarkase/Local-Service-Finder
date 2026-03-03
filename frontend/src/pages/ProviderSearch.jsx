@@ -100,8 +100,16 @@ const ProviderSearch = () => {
                 </div>
               </div>
               <div className="bg-gray-50 px-6 py-3 border-t flex justify-between items-center">
-                <span className="text-xs text-green-600 font-bold bg-green-100 px-2 py-1 rounded">VERIFIED</span>
-                <span className="text-blue-600 font-medium text-sm">View Profile →</span>
+                <div className="flex gap-2">
+                  <span className="text-[10px] text-green-600 font-bold bg-green-100 px-2 py-1 rounded uppercase tracking-wider">Verified</span>
+                  {provider.is_online && (
+                    <span className="flex items-center text-[10px] text-blue-600 font-bold bg-blue-100 px-2 py-1 rounded uppercase tracking-wider">
+                      <span className="w-1.5 h-1.5 bg-blue-600 rounded-full mr-1 animate-pulse"></span>
+                      Online
+                    </span>
+                  )}
+                </div>
+                <span className="text-blue-600 font-semibold text-sm">View Profile →</span>
               </div>
             </Link>
           ))}

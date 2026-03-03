@@ -41,12 +41,18 @@ def get_providers(
     category: Optional[str] = None,
     pincode: Optional[str] = None,
     verified_only: bool = True,
+    online_only: bool = True,
+    lat: Optional[float] = None,
+    lng: Optional[float] = None,
+    radius_km: float = 10.0,
     sort_by: Optional[str] = "rating", # rating, experience
     session: Session = Depends(get_session)
 ):
     statement = select(ServiceProvider)
     if verified_only:
         statement = statement.where(ServiceProvider.verified == True)
+    if online_only:
+        statement = statement.where(ServiceProvider.is_online == True)
     if pincode:
         statement = statement.where(ServiceProvider.location_pincode == pincode)
     if category:
